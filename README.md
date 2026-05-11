@@ -37,9 +37,9 @@
 ### 🔧 技术特性
 - **纯前端实现**：无需后端，双击 HTML 即可运行
 - **两种数据模式**：
-  - 📝 Mock 模式：使用本地 JSON 数据，完全离线
-  - 🌐 API 模式：实时获取 TMDB 官方数据
-- **自动缓存**：API 数据自动写入本地 JSON，支持快速切换和离线使用
+  - 📝 Mock 模式：`file://` 协议下自动启用，使用本地 JSON 或内嵌数据，完全离线
+  - 🌐 API 模式：配置 TMDB Token 后自动切换，实时获取官方数据
+- **自动降级**：API 失败时依次回退到本地 JSON → 内嵌 MOCK_DATA，保证数据始终可用
 - **零外部依赖**：Server.js 仅使用 Node 原生模块，无 npm 依赖
 
 ## 🚀 快速开始
@@ -48,7 +48,7 @@
 
 1. 找到项目文件夹
 2. **双击** `index.html` 即可在浏览器中打开
-3. 页面完全可用（使用本地 JSON 数据）
+3. 页面使用内嵌 MOCK_DATA 渲染，完全离线可用
 
 **优点**：无需任何配置或服务器  
 **缺点**：无法使用实时 API 数据
@@ -64,34 +64,39 @@
 
 ### 方式三：启动 Node.js 本地服务
 
-使用项目自带的 `server.js`（无需 npm 安装任何依赖）：
+使用项目自带的 `server.js`（零依赖，仅使用 Node 内置模块）：
 
 ```powershell
-# 进入项目目录
-cd movie-poster-wall
+# 1. （可选）配置 TMDB Token — 创建 .env 文件写入：
+#    TMDB_TOKEN=你的Token
 
-# 启动服务（需要 Node.js）
+# 2. 启动服务
 node server.js
 ```
 
-服务启动后，在浏览器打开：
-- 首页：http://localhost:3000/index.html
-- 收藏：http://localhost:3000/favorites.html
-- 详情：http://localhost:3000/detail.html?id=157336
+服务启动后，访问 http://localhost:3000 即可。
+
+`server.js` 功能：
+- 静态文件托管（HTML/CSS/JS/JSON/图片）
+- 通过 `/env.js` 向前端注入 TMDB Token
+- 支持 `.env` 文件和环境变量读取 Token
+- 提供 `POST /sync/*` 接口，API 数据自动写回本地 JSON
 
 **优点**：
 - 支持 API 数据自动同步到本地 JSON
-- 可在 Mock 模式和 API 模式间切换
-- 完整的数据持久化功能
+- 自动检测 Token 切换 Mock/API 模式
+- 完整的数据持久化
 
 ## 📁 项目结构
 
 ```
-movie-poster-wall/
+move-poster-wall/
 ├── index.html              # 首页（电影海报墙）
 ├── detail.html             # 详情页（电影详细信息）
 ├── favorites.html          # 收藏页（用户收藏列表）
-├── server.js               # 本地服务（Node.js）
+├── server.js               # 本地服务（Node.js，零依赖）
+├── .env.example            # 环境变量示例
+├── .gitignore
 ├── README.md               # 项目说明文档
 │
 ├── css/                    # 样式文件
@@ -101,18 +106,15 @@ movie-poster-wall/
 │   └── favorites.css      # 收藏页样式（网格布局、空状态）
 │
 ├── js/                     # JavaScript 文件
-│   ├── data.js            # 数据配置 + API 封装（TMDB接口、本地JSON加载）
+│   ├── data.js            # 数据配置 + TMDB API 封装 + 内嵌 MOCK_DATA（20 部）
 │   ├── common.js          # 公共函数（主题切换、收藏管理、导航）
 │   ├── index.js           # 首页逻辑（海报墙、轮播、事件处理）
 │   ├── detail.js          # 详情页逻辑（数据展示、收藏操作）
 │   └── favorites.js       # 收藏页逻辑（列表渲染、删除操作）
 │
-├── data/                   # 数据目录
-│   ├── upcoming.json      # 即将上映电影列表（本地JSON）
-│   └── movies/            # 电影详情 JSON 文件
-│       ├── 1043197.json
-│       ├── 1196067.json
-│       └── ...（20部电影数据）
+├── data/                   # 运行时生成（已 gitignore）
+│   ├── upcoming.json      # API 同步的电影列表缓存
+│   └── movies/            # API 同步的电影详情缓存
 │
 └── screenshots/            # 项目截图
     ├── home.png
@@ -128,27 +130,20 @@ movie-poster-wall/
 
 ```javascript
 const CONFIG = {
-  USE_MOCK: true,              // true: 本地JSON，false: TMDB API
-  TMDB_TOKEN: '',           // TMDB API Token（需要到官方申请）
+  USE_MOCK: true,           // 自动检测：file:// 协议或未配置 Token 时强制为 true
+  TMDB_TOKEN: '',           // 由 server.js 通过 /env.js 注入
   TMDB_BASE_URL: "https://api.themoviedb.org/3",
   IMAGE_BASE_URL: "https://image.tmdb.org/t/p",
-  LOCAL_DATA_BASE: "./data",   // 本地数据目录
-  LOCAL_SYNC_BASE: "/sync"     // 同步写入接口（需要 Node.js 服务器）
+  LOCAL_DATA_BASE: "./data" // file:// 协议下自动使用相对路径
 };
 ```
 
 ### 使用 Mock 本地数据（默认）
 
-**无需任何配置，项目默认已启用。** 所有数据存储在 `data/` 目录中：
+**无需任何配置，项目默认已启用。** 数据来源：
 
-```
-data/
-├── upcoming.json              # 即将上映电影列表
-└── movies/
-    ├── 157336.json           # 电影详情数据（按 TMDB ID）
-    ├── 639988.json
-    └── ...（共20部电影）
-```
+1. **内嵌 MOCK_DATA**（`js/data.js`）：硬编码 20 部电影的完整数据，始终可用，保证离线运行
+2. **运行时缓存**（`data/` 目录，已 gitignore）：通过 API 模式同步生成，供后续离线使用
 
 **优点**：
 - ✅ 完全离线，不受网络限制
@@ -163,17 +158,24 @@ data/
    - 申请 API Token（需要填写应用信息）
 
 2. **配置 Token**
-   - 在 `js/data.js` 中找到 `const tmdb_token = '';`
-   - 替换为：`const tmdb_token = "你的Token";`
 
-3. **启用 API 模式**
-   - 确保 `USE_MOCK: false`（或自动检测）
-   - 刷新页面，即可使用实时数据
+   将 Token 填入项目根目录下的 `.env` 文件：
+   ```env
+   TMDB_TOKEN=你的Token
+   ```
+   `server.js` 启动时会读取 `.env`，并通过 `/env.js` 注入到前端。`data.js` 检测到 Token 后自动启用 API 模式。
 
-4. **数据自动同步**
-   - 使用 Node.js 服务器运行项目
-   - API 获取的数据会自动写入 `data/` 目录
-   - 后续可切换回 Mock 模式使用已缓存的数据
+   也可以直接设置系统环境变量 `TMDB_TOKEN`，优先级高于 `.env` 文件。
+
+3. **启动服务**
+   ```powershell
+   node server.js
+   ```
+   启动后即可使用实时数据，API 获取的数据会自动同步写入 `data/` 目录。
+
+4. **离线回退**
+   - 后续即使停止服务、直接双击 `index.html`，也可使用已缓存的本地数据
+   - 降级链：本地 JSON → 内嵌 MOCK_DATA（`js/data.js` 中硬编码 20 部电影）
 
 ### 本地 JSON 与自动同步
 
@@ -207,7 +209,8 @@ POST /sync/movie/:id        → data/movies/:id.json
 - **无依赖**：仅使用 Node 内置模块（fs、path、http）
 
 ### 数据源
-- **本地 JSON**：静态电影数据文件
+- **内嵌 MOCK_DATA**：20 部电影硬编码数据，零依赖离线可用
+- **本地 JSON 缓存**：API 同步写入 `data/`，运行时生成（已 gitignore）
 - **TMDB API**：可选的实时数据接口
 
 ### 主题系统
@@ -267,16 +270,19 @@ html[data-theme="light"] {
 
 ### 本项目数据
 
-项目包含 20 部电影的完整数据：
+项目在 `js/data.js` 中内嵌了 20 部电影的完整数据（`MOCK_DATA`），确保零依赖离线运行。启用 API 模式后，通过 `server.js` 的同步接口可将实时数据缓存到 `data/` 目录（已 gitignore），供后续离线使用。
+
+降级链：本地 JSON 缓存 → 内嵌 MOCK_DATA
 
 ```json
-// data/upcoming.json 示例
+// data/upcoming.json 示例（API 同步生成，已 gitignore）
 {
   "results": [
     {
       "id": 157336,
-      "title": "超能陆战队",
-      "poster_path": "/path/to/poster.jpg",
+      "title": "星际穿越",
+      "poster_path": "/c35Vwd9rmMQfaEJuUrJRF3LZWJX.jpg",
+      "vote_average": 8.466,
       ...
     },
     ...
@@ -284,7 +290,7 @@ html[data-theme="light"] {
 }
 ```
 
-所有电影详情存储在 `data/movies/<id>.json` 中，包含：
+每部电影详情（`data/movies/<id>.json`）包含：
 - 基本信息（标题、评分、发行日期）
 - 中文标题和描述
 - 海报和背景图片
