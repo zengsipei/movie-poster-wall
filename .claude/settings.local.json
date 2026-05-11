@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(gh repo *)",
+      "Bash(git push *)",
+      "Bash(browser-harness *)",
+      "Bash(git rm *)",
+      "Bash(git reset *)",
+      "Bash(git check-ignore *)"
+    ]
+  }
+}

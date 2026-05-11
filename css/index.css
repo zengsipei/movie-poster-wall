@@ -1,0 +1,374 @@
+/* 首页样式重构 - 大屏轮播风格 */
+
+/* 顶部展示区 (Hero) */
+.hero {
+    position: fixed; /* 全屏固定 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; /* Full viewport height */
+    overflow: hidden;
+    background-color: #141414;
+    z-index: 0;
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.5s ease-in-out, transform 10s ease; /* Fade effect for image */
+    transform-origin: center;
+}
+
+/* 动态缩放效果 */
+.hero.active-zoom .hero-background {
+    transform: scale(1.05); /* Zoom in slowly */
+}
+
+/* 渐变遮罩 */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 70% 50%, transparent 20%, rgba(0, 0, 0, 0.4) 100%);
+    z-index: 1;
+}
+
+.hero-overlay-horizontal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.6) 30%,
+        rgba(0, 0, 0, 0.3) 60%,
+        transparent 100%
+    );
+    z-index: 2;
+}
+
+/* Hero 内容 */
+.hero-content {
+    position: absolute;
+    bottom: 30vh; /* Moved up to make room for static actions */
+    left: 60px;
+    max-width: 650px;
+    z-index: 3;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* 激活态内容显示 */
+.hero-content.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hero-title {
+    font-size: 5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+    color: #fff;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: #e5e5e5;
+    font-weight: 500;
+}
+
+.hero-rating {
+    background-color: #46d369;
+    color: #000;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.hero-overview {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: #ccc;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 90%;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 20px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 36px;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background-color: #fff;
+    color: #000;
+}
+
+.btn-primary:hover {
+    background-color: rgba(255,255,255,0.7);
+}
+
+/* =========================================
+   底部轮播控制器 - 左下角 & 缩小版
+   ========================================= */
+
+.carousel-section-wrapper {
+    position: fixed;
+    bottom: 50px;
+    left: 60px;
+    width: 38vw; /* Limit width to ~1/3 of screen */
+    min-width: 500px; /* Minimum width for readability */
+    z-index: 10;
+}
+
+.carousel-header {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.carousel-thumbnails-container {
+    position: relative;
+    width: 100%;
+    /* No fixed height, adapt to content */
+    display: flex;
+    align-items: center;
+}
+
+/* Nav Buttons */
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    width: 25px;
+    height: 100%; /* Stretch to container height if possible, or fixed reasonable height */
+    min-height: 100px; /* Ensure click area */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.2s;
+    font-size: 24px;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    backdrop-filter: blur(2px);
+}
+
+.nav-btn.prev {
+    margin-right: 5px;
+    border-radius: 4px;
+}
+
+.nav-btn.next {
+    margin-left: 5px;
+    border-radius: 4px;
+}
+
+.nav-btn:disabled {
+    opacity: 0; /* Hide if disabled */
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Viewport & Track */
+.carousel-viewport {
+    flex-grow: 1;
+    overflow: hidden; /* Hide overflow */
+    position: relative;
+    border-radius: 4px;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 10px;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    /* Width will be dynamic based on content */
+}
+
+/* Thumbnail Items */
+.thumbnail-item {
+    /* 
+       Ensure exactly 10 visible items in viewport.
+       Formula: 100% / 10 - adjusted gap 
+       We use flex: 0 0 calc(10% - 9px); 
+       gap is 10px. 9 gaps = 90px total. 
+       Let's use Calc for precision.
+       (100% - 9 * 10px) / 10
+    */
+    flex: 0 0 calc((100% - 90px) / 10);
+    aspect-ratio: 2/3;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    opacity: 0.6;
+}
+
+.thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-item:hover {
+    opacity: 1;
+    transform: scale(1.05); /* Slight zoom */
+}
+
+.thumbnail-item.active {
+    border-color: #fff;
+    opacity: 1;
+    transform: scale(1.1);
+    z-index: 2;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .hero-title {
+        font-size: 3.5rem;
+    }
+    
+    .carousel-section-wrapper {
+        width: 60vw; /* Expand a bit on smaller screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .carousel-section-wrapper {
+        width: 90vw;
+        left: 5vw;
+        bottom: 20px;
+    }
+    
+    .thumbnail-item {
+        /* On mobile, maybe show 5 items */
+        flex: 0 0 calc((100% - 40px) / 5); 
+    }
+    
+    .hero-content {
+        left: 20px;
+        bottom: 30vh;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+}
+
+/* 静态操作区 */
+.hero-actions-static {
+    position: fixed;
+    bottom: 20vh;
+    left: 60px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* 低视觉优先级的详情按钮 */
+.btn-glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 10px 30px;
+    border-radius: 50px; /* 圆角更柔和 */
+    text-decoration: none;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+/* 收藏爱心按钮 */
+.btn-fav {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.btn-fav:hover {
+    transform: scale(1.2);
+}
+
+.btn-fav.active {
+    color: #e50914; /* Netflix Red or Heart Red */
+    animation: heartbeat 1s;
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    15% { transform: scale(1.3); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+}

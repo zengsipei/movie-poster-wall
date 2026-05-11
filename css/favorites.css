@@ -1,0 +1,207 @@
+/* 收藏页样式 */
+
+/* 页面容器 */
+.favorites-container {
+    min-height: 100vh;
+    padding-top: 70px;
+}
+
+/* 内容区域 */
+.favorites-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 40px;
+}
+
+/* 页面标题 */
+.favorites-header {
+    margin-bottom: 40px;
+}
+
+.favorites-title {
+    font-size: 42px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.favorites-count {
+    font-size: 18px;
+    color: var(--text-secondary);
+}
+
+/* 电影网格 */
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px;
+}
+
+/* 电影卡片 */
+.movie-card {
+    position: relative;
+    cursor: pointer;
+    transition: transform var(--transition);
+}
+
+.movie-card:hover {
+    transform: translateY(-10px);
+}
+
+.card-poster-wrapper {
+    position: relative;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: box-shadow var(--transition);
+}
+
+.movie-card:hover .card-poster-wrapper {
+    box-shadow: var(--card-shadow-hover);
+}
+
+.card-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+}
+
+/* 移除按钮 */
+.remove-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.8);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all var(--transition);
+    z-index: 10;
+}
+
+.movie-card:hover .remove-btn {
+    opacity: 1;
+}
+
+.remove-btn:hover {
+    background: var(--accent);
+    transform: scale(1.1);
+}
+
+/* 评分徽章 */
+.card-rating {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffd700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 电影标题 */
+.card-title {
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 空状态 */
+.empty-state {
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.empty-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+}
+
+.empty-description {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+/* 响应式 */
+@media (max-width: 1200px) {
+    .favorites-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .favorites-content {
+        padding: 40px 20px;
+    }
+
+    .favorites-title {
+        font-size: 32px;
+    }
+
+    .favorites-count {
+        font-size: 16px;
+    }
+
+    .favorites-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 20px;
+    }
+
+    .card-title {
+        font-size: 14px;
+    }
+
+    .empty-icon {
+        font-size: 60px;
+    }
+
+    .empty-title {
+        font-size: 24px;
+    }
+
+    .empty-description {
+        font-size: 16px;
+    }
+}
+
+/* 删除动画 */
+@keyframes removeCard {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+.movie-card.removing {
+    animation: removeCard 0.3s ease-out forwards;
+}

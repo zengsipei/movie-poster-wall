@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的收藏 - 电影海报墙</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/favorites.css">
+    <script>
+        // 禁用 Service Worker 以支持 file:// 协议
+        if (window.location.protocol === 'file:') {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => {
+                        registration.unregister();
+                    });
+                }).catch(() => {
+                    // 忽略错误
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-logo">
+            🎬 电影墙
+        </a>
+        
+        <ul class="navbar-nav">
+            <li><a href="index.html" data-page="home">首页</a></li>
+            <li><a href="favorites.html" data-page="favorites" class="active">收藏</a></li>
+        </ul>
+    </nav>
+    
+    <!-- 收藏容器 -->
+    <div class="favorites-container">
+        <div class="loading">加载中</div>
+    </div>
+    
+    <!-- 脚本 -->
+    <script src="/env.js" onerror="window.TMDB_TOKEN=window.TMDB_TOKEN||''"></script>
+    <script src="js/data.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/favorites.js"></script>
+</body>
+</html>
